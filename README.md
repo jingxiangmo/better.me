@@ -32,10 +32,12 @@ We are proud that we came up with such a novel idea that could be useful to innu
 
 ## Roadmap
 
-| Firebase Back End Architecture | We hope to design a scalable backend which accommodates for the users needs.   |
+| Future Implementations                | Descriptions                                                                               |
 | ------------------------------ | ------------------------------------------------------------------------------ |
+| Firebase Back End Architecture | We hope to design a scalable backend which accommodates for the users needs.   |
 | AI Mental Health Chat bot      | Provide on the spot, mental health support using Dialogflow AI chat bot.       |
 | Connect with Therapists        | Elevate data analytical features to connect and report to personal therapists. |
 | Scaling Up                     | Fund our project and develop this project with scalable front and back end.    |
-| Languages Support              | Support multiple languages, including French, Mandarin, and Spanish.            | 
+| Languages Support              | Support multiple languages, including French, Mandarin, and Spanish.           |
+
 
