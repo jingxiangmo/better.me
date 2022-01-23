@@ -25,7 +25,7 @@ class SuicideDetectionClassifier(pl.LightningModule):
     def __init__(self):
         super().__init__()
         self.model = BertForSequenceClassification.from_pretrained('bert-base-cased')
-        self.loss = CrossEntropyLoss()
+        self.loss = pt.nn.CrossEntropyLoss()
 
     def forward(self, x):
         mask = (x != 0).float()  
