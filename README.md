@@ -12,7 +12,7 @@ Humans are emotional creatures, but we’re bad at knowing our emotions. Our mis
 
 ### Architecture
 Frontend: React + Streamlit
-Backend: Firestore
+Backend: Python / Google Cloud SDK App Engine
 
 
 ### Run
