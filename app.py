@@ -10,10 +10,41 @@ from collections import Counter
 import plotly.express as px
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
-
+import hashlib
+import sqlite3
 
 from resources import choose_resources, choose_support
 
+# Login & Security
+
+def make_hashes(password):
+	return hashlib.sha256(str.encode(password)).hexdigest()
+
+def check_hashes(password,hashed_text):
+	if make_hashes(password) == hashed_text:
+		return hashed_text
+	return False
+
+# DB for Passwords
+conn = sqlite3.connect('data.db')
+c = conn.cursor()
+
+def create_usertable():
+	c.execute('CREATE TABLE IF NOT EXISTS userstable(username TEXT UNIQUE,password TEXT)')
+
+def add_userdata(username,password):
+	c.execute('INSERT INTO userstable(username,password) VALUES (?,?)',(username,password))
+	conn.commit()
+
+def login_user(username,password):
+	c.execute('SELECT * FROM userstable WHERE username =? AND password = ?',(username,password))
+	data = c.fetchall()
+	return data
+
+def view_all_users():
+	c.execute('SELECT * FROM userstable')
+	data = c.fetchall()
+	return data
 
 def main():
     pages = {
@@ -31,7 +62,7 @@ def main():
 
             # Notes already made for demo
             "notes": [
-                ("Today I woke up, and didnt want to get out of bed. I just sort of laied there. This made me feel bad.", "sadness", datetime(2020, 12, 15)),
+                ("Today I woke up, and didnt want to get out of bed. I just sort of laid there. This made me feel bad.", "sadness", datetime(2020, 12, 15)),
                 ("This afternoon, I ate a big meal. This made me feel good, I would like to eat more.", "joy", datetime(2020, 12, 15)),
                 ("It was hard for me to sleep yesterday, I had a girl on my mind.", "love", datetime(2020, 12, 16)),
                 ("This morning, I got up before my alarm. I was excited to get out of bed!", "joy", datetime(2020, 12, 16)),
@@ -88,13 +119,30 @@ def page_home():
         ##### Welcome to Better.Me. Please login below to access your personal AI powered diary.
         '''
         username = st.text_input('Username')
-        password = st.text_input('Password')
+        password = st.text_input("Password", type="password")
 
         if st.button('Login'):
-            st.session_state.page = "Journal"
-            # page_journal()
+            create_usertable()
+            hashed_pswd = make_hashes(password)
+            result = login_user(username,check_hashes(password,hashed_pswd))
+            if result:
+                st.success("Logged In as {}".format(username))
+                st.session_state.page = "Journal"
+                page_journal()
+            else:
+                st.warning("Incorrect Username/Password")
 
-        st.write('Not a member? Sign up here')
+        st.write('Not a member? Sign up from the button below')
+        
+        if st.button('Sign Up'):
+            create_usertable()
+            try:
+                add_userdata(username,make_hashes(password))
+                st.success("You have successfully created a valid Account")
+                st.session_state.page = "Journal"
+                page_journal()
+            except Exception:
+                st.warning("Username already exists")
 
 
 def page_journal():
@@ -110,7 +158,10 @@ def page_journal():
         data = {"inputs": note}
         st.session_state.placeholder_text = note
         res = requests.post(API_URL, json=data, headers=headers).json()
-        mood = res[0]['generated_text']
+        try:
+            mood = res[0]['generated_text']
+        except KeyError:
+            st.warning("We're sorry! No meaningful mood analysis could be completed 😢.")
         date = datetime.now()
         st.info(f"Your mood report -- {mood} {mood_to_emoji(mood)}")
         # notes.append(note)
@@ -258,7 +309,6 @@ def page_resources():
         st.header(s3.title)
         st.write(s3.description)
         st.markdown("[Learn More](%s)" % s3.url, unsafe_allow_html=True)
-
 
 if __name__ == "__main__":
     main()
