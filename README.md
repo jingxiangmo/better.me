@@ -6,7 +6,7 @@ Poor mental health is a growing pandemic that is still being stigmatized. Even a
 > Our mission is to provide a private environment to help people analyze their emotions and receive mental health support.
 
 ## Product Overview
-- Personal Journal
+- Personal Journal <br>
 Better Me is a personal AI-powered journal where users can write daily notes reflecting on their life's progress.
 
 - NLP Emotion Analytics <br>
