@@ -3,6 +3,7 @@ import pytorch_lightning as pl
 from transformers import BertTokenizer, BertForSequenceClassification 
 import numpy as np
 import pandas as pd
+import torch.distributed
 
 try:
     from torch.hub import load_state_dict_from_url
@@ -13,7 +14,7 @@ model_urls = dict(
     params='https://github.com/better-me-team/better.me/releases/download/model_params/model.pt',
 )
 
-class SuicideDataset(Dataset):
+class SuicideDataset():
     def __init__(self, dataset):
         self.dataset = dataset
     def __len__(self):
@@ -55,9 +56,11 @@ class SuicideDetectionClassifier(pl.LightningModule):
         optimizer = pt.optim.Adam(self.parameters(), lr=1e-5)
         return optimizer
 
-def load_model(path=params, progress=True):
-    model_state = load_state_dict_from_url(model_urls.get(path), progress=progress)
-    return model_state
+def load_model(path=model_urls["params"], progress=True):
+    #model = SuicideDetectionClassifier.load_from_checkpoint("/Users/beyzayildirim/Downloads/model.pt", map_location=pt.device("cpu"))
+    model = pt.load("./model.pt", map_location=pt.device("cpu"))
+    #load_state_dict_from_url(model_urls.get(path), progress=progress)
+    return model
 
 def pred(text: str, model):
     tokenizer = BertTokenizer.from_pretrained('bert-base-cased')
@@ -69,3 +72,4 @@ def pred(text: str, model):
     # 0 = not suicidal
     # 1 = suicidal
     return np.argmax(pt.nn.Softmax()(model(x)).view(-1).detach().numpy())
+
