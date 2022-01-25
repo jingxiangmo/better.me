@@ -4,6 +4,7 @@
 
 <!-- Demo pictures at the end of the document. -->
 <!-- Check out the deployed app on GCP App Engine from [here](https://betterme-journal.uc.r.appspot.com/)! -->
+Check out the project details from [Devpost](https://devpost.com/software/better-me-5w3lpj?ref_content=user-portfolio&ref_feature=in_progress)!
 
 ## Project Description
 better.me is an AI journaling tool that helps you analyze your emotions and provide you with smart recommendations for your well being. We used NLP emotion analytics to process text data and incorporated a suicidal prevention algorithm that will help you make better informed decisions about your mental health.  
