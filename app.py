@@ -12,6 +12,7 @@ from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import hashlib
 import sqlite3
+from model_loading import *
 
 from resources import choose_resources, choose_support
 
@@ -26,18 +27,22 @@ def check_hashes(password,hashed_text):
 	return False
 
 # DB for Passwords
+
 conn = sqlite3.connect('data.db')
 c = conn.cursor()
 
+suicide_model = load_model()
+suicide_model.eval()
+
 def create_usertable():
-	c.execute('CREATE TABLE IF NOT EXISTS userstable(username TEXT UNIQUE,password TEXT)')
+	c.execute('CREATE TABLE IF NOT EXISTS userstable(username TEXT UNIQUE, password TEXT)')
 
 def add_userdata(username,password):
 	c.execute('INSERT INTO userstable(username,password) VALUES (?,?)',(username,password))
 	conn.commit()
 
 def login_user(username,password):
-	c.execute('SELECT * FROM userstable WHERE username =? AND password = ?',(username,password))
+	c.execute('SELECT * FROM userstable WHERE username = ? AND password = ?',(username,password))
 	data = c.fetchall()
 	return data
 
@@ -82,13 +87,6 @@ def main():
             ],
             "placeholder_text": "..."
 
-            # Default widget values
-            # "text": "",
-            # "slider": 0,
-            # "checkbox": False,
-            # "radio": "Hello",
-            # "selectbox": "Hello",
-            # "multiselect": ["Hello", "Everyone"],
         })
 
         # FAKE DATA GENERATOR
@@ -134,16 +132,26 @@ def page_home():
 
         st.write('Not a member? Sign up from the button below')
         
+        if st.button('Sign Me Up'):
+            page_signup()
+
+def page_signup():
+    with st.container():
+
+        new_username = st.text_input('New username')
+        new_password = st.text_input("New password", type="password")
+        
         if st.button('Sign Up'):
+            if new_username or new_password is None:
+                st.warning("Please input a username and/or password!")
             create_usertable()
             try:
-                add_userdata(username,make_hashes(password))
+                add_userdata(new_username,make_hashes(new_password))
                 st.success("You have successfully created a valid Account")
                 st.session_state.page = "Journal"
                 page_journal()
-            except Exception:
+            except Exception as e:
                 st.warning("Username already exists")
-
 
 def page_journal():
     st.title("📝 Write a note")
@@ -160,10 +168,13 @@ def page_journal():
         res = requests.post(API_URL, json=data, headers=headers).json()
         try:
             mood = res[0]['generated_text']
+            date = datetime.now()
+            st.info(f"Your mood report -- {mood} {mood_to_emoji(mood)}")
         except KeyError:
             st.warning("We're sorry! No meaningful mood analysis could be completed 😢.")
-        date = datetime.now()
-        st.info(f"Your mood report -- {mood} {mood_to_emoji(mood)}")
+        suicide_pred = pred(mood, suicide_model)
+        if suicide_pred == 1:
+            st.warning("We're so sorry that you are going through this. Help is available! Speak with someone today at +1 833-456-4566. \n Asking for help can be hard. That’s why we offer a safe place to talk - any time, in your own way. If you are having thoughts of suicide, you don’t have to face them alone. We are available if you need a safe and judgement free place to talk. Our responders are here to listen to you, support you, and keep you safe.")
         # notes.append(note)
         st.session_state.notes.append((note, mood, date))
         return mood
@@ -309,6 +320,7 @@ def page_resources():
         st.header(s3.title)
         st.write(s3.description)
         st.markdown("[Learn More](%s)" % s3.url, unsafe_allow_html=True)
+
 
 if __name__ == "__main__":
     main()
