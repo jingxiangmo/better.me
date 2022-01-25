@@ -1,5 +1,8 @@
 # better.me, AI Journaling
 
+<img src="images/demo7.png" width=100% height=100%>
+
+Demo pictures at the end of the document.
 Check out the deployed app on GCP App Engine from [here](https://betterme-journal.uc.r.appspot.com/)!
 
 ## Project Description
@@ -40,5 +43,13 @@ We are proud that we came up with such a novel idea that could be useful to innu
 | Connect with Therapists        | Elevate data analytical features to connect and report to personal therapists. |
 | Scaling Up                     | Fund our project and develop this project with scalable front and back end.    |
 | Languages Support              | Support multiple languages, including French, Mandarin, and Spanish.           |
+
+## Demo Picture
+<img src="images/demo1.jpg" width=100% height=100%>
+<img src="images/demo2.jpg" width=100% height=100%>
+<img src="images/demo3.jpg" width=100% height=100%>
+<img src="images/demo4.jpg" width=100% height=100%>
+<img src="images/demo5.jpg" width=100% height=100%>
+<img src="images/demo6.jpg" width=100% height=100%>
 
 
