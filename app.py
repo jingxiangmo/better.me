@@ -183,10 +183,10 @@ def page_journal():
             st.info(f"Your mood report -- {mood} {mood_to_emoji(mood)}")
         except KeyError:
             st.warning("We're sorry! No meaningful mood analysis could be completed 😢.")
-        suicide_pred = pred(mood, suicide_model)
-        if suicide_pred == 1:
-            st.warning(
-                "We're so sorry that you are going through this. Help is available! Speak with someone today at +1 833-456-4566. \n Asking for help can be hard. That’s why we offer a safe place to talk - any time, in your own way. If you are having thoughts of suicide, you don’t have to face them alone. We are available if you need a safe and judgement free place to talk. Our responders are here to listen to you, support you, and keep you safe.")
+        # suicide_pred = pred(mood, suicide_model)
+        #if suicide_pred == 1:
+        #   st.warning(
+        #       "We're so sorry that you are going through this. Help is available! Speak with someone today at +1 833-456-4566. \n Asking for help can be hard. That’s why we offer a safe place to talk - any time, in your own way. If you are having thoughts of suicide, you don’t have to face them alone. We are available if you need a safe and judgement free place to talk. Our responders are here to listen to you, support you, and keep you safe.")
         # notes.append(note)
         st.session_state.notes.append((note, mood, date))
         return mood
