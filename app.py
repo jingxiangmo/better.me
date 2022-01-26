@@ -1,11 +1,7 @@
 import streamlit as st
 import requests
-import json
-from datetime import datetime
-import pandas as pd
-import numpy as np
+from datetime import datetime, time
 from random import randint
-import altair as alt
 from collections import Counter
 import plotly.express as px
 from plotly.subplots import make_subplots
@@ -16,40 +12,48 @@ from model_loading import *
 
 from resources import choose_resources, choose_support
 
+
 # Login & Security
 
 def make_hashes(password):
-	return hashlib.sha256(str.encode(password)).hexdigest()
+    return hashlib.sha256(str.encode(password)).hexdigest()
 
-def check_hashes(password,hashed_text):
-	if make_hashes(password) == hashed_text:
-		return hashed_text
-	return False
+
+def check_hashes(password, hashed_text):
+    if make_hashes(password) == hashed_text:
+        return hashed_text
+    return False
+
 
 # DB for Passwords
 
 conn = sqlite3.connect('data.db')
 c = conn.cursor()
 
-suicide_model = load_model()
-suicide_model.eval()
+# suicide_model = load_model()
+# suicide_model.eval()
+
 
 def create_usertable():
-	c.execute('CREATE TABLE IF NOT EXISTS userstable(username TEXT UNIQUE, password TEXT)')
+    c.execute('CREATE TABLE IF NOT EXISTS userstable(username TEXT UNIQUE, password TEXT)')
 
-def add_userdata(username,password):
-	c.execute('INSERT INTO userstable(username,password) VALUES (?,?)',(username,password))
-	conn.commit()
 
-def login_user(username,password):
-	c.execute('SELECT * FROM userstable WHERE username = ? AND password = ?',(username,password))
-	data = c.fetchall()
-	return data
+def add_userdata(username, password):
+    c.execute('INSERT INTO userstable(username,password) VALUES (?,?)', (username, password))
+    conn.commit()
+
+
+def login_user(username, password):
+    c.execute('SELECT * FROM userstable WHERE username = ? AND password = ?', (username, password))
+    data = c.fetchall()
+    return data
+
 
 def view_all_users():
-	c.execute('SELECT * FROM userstable')
-	data = c.fetchall()
-	return data
+    c.execute('SELECT * FROM userstable')
+    data = c.fetchall()
+    return data
+
 
 def main():
     pages = {
@@ -67,14 +71,19 @@ def main():
 
             # Notes already made for demo
             "notes": [
-                ("Today I woke up, and didnt want to get out of bed. I just sort of laid there. This made me feel bad.", "sadness", datetime(2020, 12, 15)),
-                ("This afternoon, I ate a big meal. This made me feel good, I would like to eat more.", "joy", datetime(2020, 12, 15)),
+                ("Today I woke up, and didnt want to get out of bed. I just sort of laid there. This made me feel bad.",
+                 "sadness", datetime(2020, 12, 15)),
+                ("This afternoon, I ate a big meal. This made me feel good, I would like to eat more.", "joy",
+                 datetime(2020, 12, 15)),
                 ("It was hard for me to sleep yesterday, I had a girl on my mind.", "love", datetime(2020, 12, 16)),
-                ("This morning, I got up before my alarm. I was excited to get out of bed!", "joy", datetime(2020, 12, 16)),
+                ("This morning, I got up before my alarm. I was excited to get out of bed!", "joy",
+                 datetime(2020, 12, 16)),
                 ("Uber gave me a free meal today. I wonder why.", "surprise", datetime(2020, 12, 16)),
                 ("I couldnt fall asleap yesterday. I just stared at the cealing.", "anger", datetime(2020, 12, 17)),
-                ("This morning I woke up with a horrible hedache. Motrin didn't help.", "anger", datetime(2020, 12, 17)),
-                ("I havent written a post recently. Its a good habit I should get back into.", "anger", datetime(2020, 12, 20)),
+                (
+                "This morning I woke up with a horrible hedache. Motrin didn't help.", "anger", datetime(2020, 12, 17)),
+                ("I havent written a post recently. Its a good habit I should get back into.", "anger",
+                 datetime(2020, 12, 20)),
                 ("WHY AM I SO STUPID. I failed a quiz today.", "anger", datetime(2020, 12, 21)),
                 ("I cant stop thinking about that quiz. I studied so hard.", "sadness", datetime(2020, 12, 21)),
                 ("Quiz still on my mind...", "sadness", datetime(2020, 12, 21)),
@@ -122,7 +131,7 @@ def page_home():
         if st.button('Login'):
             create_usertable()
             hashed_pswd = make_hashes(password)
-            result = login_user(username,check_hashes(password,hashed_pswd))
+            result = login_user(username, check_hashes(password, hashed_pswd))
             if result:
                 st.success("Logged In as {}".format(username))
                 st.session_state.page = "Journal"
@@ -131,27 +140,29 @@ def page_home():
                 st.warning("Incorrect Username/Password")
 
         st.write('Not a member? Sign up from the button below')
-        
+
         if st.button('Sign Me Up'):
             page_signup()
+
 
 def page_signup():
     with st.container():
 
         new_username = st.text_input('New username')
         new_password = st.text_input("New password", type="password")
-        
+
         if st.button('Sign Up'):
             if new_username or new_password is None:
                 st.warning("Please input a username and/or password!")
             create_usertable()
             try:
-                add_userdata(new_username,make_hashes(new_password))
+                add_userdata(new_username, make_hashes(new_password))
                 st.success("You have successfully created a valid Account")
                 st.session_state.page = "Journal"
                 page_journal()
             except Exception as e:
                 st.warning("Username already exists")
+
 
 def page_journal():
     st.title("📝 Write a note")
@@ -174,7 +185,8 @@ def page_journal():
             st.warning("We're sorry! No meaningful mood analysis could be completed 😢.")
         suicide_pred = pred(mood, suicide_model)
         if suicide_pred == 1:
-            st.warning("We're so sorry that you are going through this. Help is available! Speak with someone today at +1 833-456-4566. \n Asking for help can be hard. That’s why we offer a safe place to talk - any time, in your own way. If you are having thoughts of suicide, you don’t have to face them alone. We are available if you need a safe and judgement free place to talk. Our responders are here to listen to you, support you, and keep you safe.")
+            st.warning(
+                "We're so sorry that you are going through this. Help is available! Speak with someone today at +1 833-456-4566. \n Asking for help can be hard. That’s why we offer a safe place to talk - any time, in your own way. If you are having thoughts of suicide, you don’t have to face them alone. We are available if you need a safe and judgement free place to talk. Our responders are here to listen to you, support you, and keep you safe.")
         # notes.append(note)
         st.session_state.notes.append((note, mood, date))
         return mood
@@ -205,7 +217,6 @@ def page_journal():
 
 
 def page_previous_journals():
-
     st.title("📕 Previous journals")
 
     mood_box = {
@@ -246,7 +257,8 @@ def page_analytics():
         'Counts': [counter[mood] for mood in mood_list]
     })
 
-    fig = make_subplots(rows=1, cols=2, subplot_titles=("Mood count -- bar", "Mood count -- pie"), specs=[[{"type": "xy"}, {"type": "domain"}]], horizontal_spacing=0.1)
+    fig = make_subplots(rows=1, cols=2, subplot_titles=("Mood count -- bar", "Mood count -- pie"),
+                        specs=[[{"type": "xy"}, {"type": "domain"}]], horizontal_spacing=0.1)
     fig.add_trace(go.Bar(x=mood_counts['Moods'], y=mood_counts['Counts']), row=1, col=1)
     fig.add_trace(go.Pie(values=mood_counts['Counts'], labels=mood_counts['Moods']), row=1, col=2)
     fig.layout.update(width=800, margin=dict(l=0))
@@ -270,7 +282,7 @@ def page_analytics():
         line_graph_frequencies,
         columns=mood_list
     )
-    mood_line_graph['Weeks'] = range(1, len(line_graph_frequencies)+1)
+    mood_line_graph['Weeks'] = range(1, len(line_graph_frequencies) + 1)
     fig = px.line(mood_line_graph, x='Weeks', y=mood_list)
     fig.layout.update(width=800, margin=dict(l=0))
     st.write(fig)

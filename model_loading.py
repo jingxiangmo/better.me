@@ -1,6 +1,6 @@
 import torch as pt
 import pytorch_lightning as pl
-from transformers import BertTokenizer, BertForSequenceClassification 
+from transformers import BertTokenizer, BertForSequenceClassification
 import numpy as np
 import pandas as pd
 import torch.distributed
@@ -14,13 +14,17 @@ model_urls = dict(
     params='https://github.com/better-me-team/better.me/releases/download/model_params/model.pt',
 )
 
+
 class SuicideDataset():
     def __init__(self, dataset):
         self.dataset = dataset
+
     def __len__(self):
         return len(self.dataset)
+
     def __getitem__(self, idx):
         return {'input_ids': self.dataset.iloc[idx][0], 'label': self.dataset.iloc[idx][1]}
+
 
 class SuicideDetectionClassifier(pl.LightningModule):
     def __init__(self):
@@ -29,7 +33,7 @@ class SuicideDetectionClassifier(pl.LightningModule):
         self.loss = pt.nn.CrossEntropyLoss()
 
     def forward(self, x):
-        mask = (x != 0).float()  
+        mask = (x != 0).float()
         logits = self.model(x, mask)['logits']
         return logits
 
@@ -56,20 +60,21 @@ class SuicideDetectionClassifier(pl.LightningModule):
         optimizer = pt.optim.Adam(self.parameters(), lr=1e-5)
         return optimizer
 
+
 def load_model(path=model_urls["params"], progress=True):
-    #model = SuicideDetectionClassifier.load_from_checkpoint("/Users/beyzayildirim/Downloads/model.pt", map_location=pt.device("cpu"))
+    # model = SuicideDetectionClassifier.load_from_checkpoint("/Users/beyzayildirim/Downloads/model.pt", map_location=pt.device("cpu"))
     model = pt.load("./model.pt", map_location=pt.device("cpu"))
-    #load_state_dict_from_url(model_urls.get(path), progress=progress)
+    # load_state_dict_from_url(model_urls.get(path), progress=progress)
     return model
+
 
 def pred(text: str, model):
     tokenizer = BertTokenizer.from_pretrained('bert-base-cased')
-    x = tokenizer.encode(text, 
-                        max_length=256, 
-                        return_tensors='pt', 
-                        padding='max_length', 
-                        truncation=True)
+    x = tokenizer.encode(text,
+                         max_length=256,
+                         return_tensors='pt',
+                         padding='max_length',
+                         truncation=True)
     # 0 = not suicidal
     # 1 = suicidal
     return np.argmax(pt.nn.Softmax()(model(x)).view(-1).detach().numpy())
-
