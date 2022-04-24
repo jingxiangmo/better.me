@@ -8,9 +8,6 @@ from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import hashlib
 import sqlite3
-from model_loading import *
-
-from resources import choose_resources, choose_support
 
 
 # Login & Security
